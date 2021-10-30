@@ -1,12 +1,23 @@
 from turtle import Turtle
 
-COLORS = ["red", "orange", "yellow", "green", "blue"]
-BRICK_WIDTH = 2
+COLORS = ["red", "orange", "yellow", "green", "blue", "blue"]
+BRICK_WIDTH = 3
 BRICK_HEIGHT = 1
 BRICK_WIDTH_PX = BRICK_WIDTH * 20
 BRICK_HEIGHT_PX = BRICK_HEIGHT * 20
 MISSING_PX_R = 10
 SPACING = 2
+
+
+class Brick(Turtle):
+    def __init__(self):
+        super().__init__()
+        self.shape("square")
+        self.shapesize(stretch_wid=BRICK_HEIGHT, stretch_len=BRICK_WIDTH)
+        self.penup()
+        self.color("black")
+        self.w = BRICK_WIDTH * 20  # px
+        self.h = BRICK_HEIGHT * 20  # px
 
 
 class BrickManager:
@@ -19,16 +30,29 @@ class BrickManager:
         )
 
     def create_bricks(self):
-        x_start = -self.window_width / 2 + (BRICK_WIDTH_PX / 2 + SPACING)
-        for i in range(self.max_bricks_x):
+        space_left_x = (
+            self.window_width
+            - MISSING_PX_R
+            - self.max_bricks_x * (BRICK_WIDTH_PX + SPACING)
+        )
+        x_start = -self.window_width / 2 + (BRICK_WIDTH_PX / 2) + (space_left_x / 2)
+        # x_start = -120
+        spacing_top = self.window_height / 2 - BRICK_HEIGHT_PX * 8
+        for i, clr in enumerate(COLORS):
+            # for j in range(5):
+            for j in range(self.max_bricks_x):
+                new_brick = Brick()
+                new_brick.color(clr)
+                new_brick.goto(
+                    x_start + (BRICK_WIDTH_PX + SPACING) * j,
+                    spacing_top - ((BRICK_HEIGHT_PX + SPACING) * i),
+                )
+                self.all_bricks.append(new_brick)
 
-            new_brick = Turtle("square")
-            new_brick.shapesize(stretch_wid=BRICK_HEIGHT, stretch_len=BRICK_WIDTH)
-            new_brick.penup()
-            new_brick.color(COLORS[0])
-            print(x_start + (BRICK_WIDTH_PX + SPACING) * i)
-            new_brick.goto(x_start + (BRICK_WIDTH_PX + SPACING) * i, 0)
-            self.all_bricks.append(new_brick)
+    def remove_brick(self, index):
+        self.all_bricks[index].hideturtle()
+        self.all_bricks[index].clear()
+        del self.all_bricks[index]
 
     # def move_cars(self):
     #     for car in self.all_cars:

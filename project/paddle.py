@@ -21,6 +21,8 @@ class Paddle(Turtle):
         self.x_limit_L = -screen_size[0] / 2 + STRETCH_X / 2 * 20
         # Left limit = half of the width - half of the paddle width in pixels - 10 lost pixels from the bezel of the screen :/
         self.x_limit_R = screen_size[0] / 2 - STRETCH_X / 2 * 20 - 10
+        self.w = STRETCH_X * 20  # px
+        self.h = STRETCH_Y * 20  # px
 
     def move_up(self):
         print("up")

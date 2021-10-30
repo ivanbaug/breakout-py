@@ -1,155 +1,114 @@
-from turtle import Screen, Turtle
-from random import randint
+from turtle import Screen
+from paddle import Paddle
+from ball import Ball
+from scoreboard import Scoreboard
+from brick_manager import BrickManager
+import time
 
-WIDTH, HEIGHT = 650, 400
-MAX_HEIGHT = 180
-BASELINE = -60
-
-NUMBER_CACTI = 3
-
-FONT = ("Courier", 24, "normal")
-
-CURSOR_SIZE = 20
-CACTUS_WIDTH, CACTUS_HEIGHT = 10, 60
+# Screen  size
+S_WIDTH = 800
+S_HEIGHT = 600
 
 
-def steady():
-    # pass
-    return dino.ycor() == BASELINE + CURSOR_SIZE / 2
-
-
-def jump():
-    y = dino.ycor()
-
-    if steady():
-        dino.sety(y + 7 * CURSOR_SIZE)
-    elif y < MAX_HEIGHT:
-        dino.sety(y + 5 * CURSOR_SIZE)
-
-
-def move_up():
-    print("up")
-    x, y = dino.pos()
-    dino.goto(x, y + 5)
-
-
-def move_down():
-    print("down")
-    x, y = dino.pos()
-    dino.goto(x, y - 5)
-
-
-def cactus_move(cactus):
-    cactus.setx(cactus.xcor() - CACTUS_WIDTH)
-
-
-def check_rect_collision(a, b):
-    return (
-        abs(a.xcor() - b.xcor()) < CURSOR_SIZE / 2 + CACTUS_WIDTH / 2
-        and abs(a.ycor() - b.ycor()) < CURSOR_SIZE / 2 + CACTUS_HEIGHT / 2
-    )
-
-
-def place_cactus(cactus):
-    cactus.setx(randint(WIDTH // 2, WIDTH))
-
-    while True:
-        for other in cacti:
-            if other is cactus:
-                continue
-
-            if other.distance(cactus) < 5 * CACTUS_WIDTH:
-                cactus.setx(randint(0, WIDTH // 2))
-                break  # for
-        else:  # no break
-            break  # while
-
-
-# scoring system
-score = 0
-
-
-def run():
-    global score
-
-    score += 1
-
-    pen.clear()
-    pen.write("Score: {} ".format(score), align="center", font=FONT)
-
-    for cactus in cacti:
-        cactus_move(cactus)
-
-        if check_rect_collision(dino, cactus):
-            screen.onkeypress(None, "space")  # Game Over
-            screen.tracer(True)
-            return
-
-        if cactus.xcor() < -WIDTH / 2:
-            place_cactus(cactus)
-
-    if not steady():
-        pass
-        # dino.sety(dino.ycor() - CURSOR_SIZE)
-
-    screen.update()
-    screen.ontimer(run, 10)  # repeat in 50 milliseconds
+# Default turtle size is 20 px by 20 px
 
 
 screen = Screen()
-screen.title("Dino game in turtle")
-screen.bgcolor("white")
-screen.setup(width=WIDTH, height=HEIGHT)
-screen.tracer(False)
-
-# ground
-ground = Turtle()
-ground.hideturtle()
-
-ground.penup()
-ground.sety(BASELINE)
-ground.pendown()
-
-ground.forward(WIDTH / 2)
-ground.backward(WIDTH)
-
-# dino
-
-dino = Turtle()
-dino.shape("square")
-dino.penup()
-dino.goto(-WIDTH / 3, BASELINE + CURSOR_SIZE / 2)
-
-# cacti
-
-cacti = []
-
-for _ in range(NUMBER_CACTI):
-
-    cactus = Turtle()
-    cactus.shape("square")
-    cactus.shapesize(CACTUS_HEIGHT / CURSOR_SIZE, CACTUS_WIDTH / CURSOR_SIZE)
-    cactus.color("green")
-
-    cactus.penup()
-    cactus.sety(BASELINE + CACTUS_HEIGHT / 2)
-    place_cactus(cactus)
-
-    cacti.append(cactus)
-
-# score pen
-pen = Turtle()
-pen.hideturtle()
-pen.penup()
-pen.sety(175)
-
-pen.write("Score: 0  High Score: 0", align="center", font=FONT)
-
-screen.onkeypress(jump, "space")
-screen.onkeypress(key="Up", fun=move_up)
-screen.onkeypress(key="Down", fun=move_down)
+screen.setup(width=S_WIDTH, height=S_HEIGHT)
+screen.bgcolor("black")
+screen.title("Ivan's Breakout Game")
 screen.listen()
+screen.tracer(0)  # update screen on command
 
-run()
 
-screen.mainloop()
+def det_collision(obj1, obj2):
+
+    x_max_dist = (obj1.w + obj2.w) / 2
+    x_dist = abs(obj1.xcor() - obj2.xcor())
+    y_max_dist = (obj1.h + obj2.h) / 2
+    y_dist = abs(obj1.ycor() - obj2.ycor())
+    ratio_x = x_dist / x_max_dist
+    ratio_y = y_dist / y_max_dist
+
+    if x_dist <= x_max_dist and y_dist <= y_max_dist:
+        if ratio_x > ratio_y:
+            print("bounce y")
+            return True, False
+        else:
+            print("bounce x")
+            return True, True
+    return False, False
+
+
+def collides_on_x(obj1, obj2):
+    y_max_dist = (obj1.h + obj2.h) / 2
+    y_dist = abs(obj1.ycor() - obj2.ycor())
+    x_max_dist = (obj1.w + obj2.w) / 2
+    x_dist = abs(obj1.xcor() - obj2.xcor())
+
+    ratio_x = x_dist / x_max_dist
+    ratio_y = y_dist / y_max_dist
+
+    if ratio_x > ratio_y:
+        print("bounce y")
+        return False
+    return True
+
+
+paddle_pos_x = (-S_HEIGHT / 2) + 10 + 20
+pd = Paddle((0, 0), (S_WIDTH, S_HEIGHT))
+
+ball = Ball()
+
+scoreb = Scoreboard()
+
+bm = BrickManager((S_WIDTH, S_HEIGHT))
+bm.create_bricks()
+
+game_is_on = True
+
+
+screen.onkeypress(key="Up", fun=pd.move_up)
+screen.onkeypress(key="Down", fun=pd.move_down)
+
+screen.onkeypress(key="Left", fun=pd.move_left)
+screen.onkeypress(key="Right", fun=pd.move_right)
+
+while game_is_on:
+    ball.move()
+    screen.update()
+    time.sleep(ball.move_speed)
+
+    # detect collision with wall
+
+    if ball.ycor() > 280 or ball.ycor() < -280:
+        ball.bounce_y()
+
+    if ball.xcor() > (S_WIDTH / 2 - 16 - 10) or ball.xcor() < -(S_WIDTH / 2 - 16):
+        ball.bounce_x()
+
+    for brick in bm.all_bricks:
+        collides = det_collision(brick, pd)
+        if collides:
+            c_x = collides_on_x(brick, ball)
+            if c_x:
+                ball.bounce_x()
+            else:
+                ball.bounce_y()
+    # detect collision with r paddle
+
+    # if (ball.distance(rp) < 50 and ball.xcor() > 320) or (
+    #     ball.distance(lp) < 50 and ball.xcor() < -320
+    # ):
+    #     ball.bounce_x()
+
+    # right paddle misses
+    # if ball.xcor() > 380:
+    #     scoreb.point_for_l()
+    #     ball.reset_position()
+    # if ball.xcor() < -380:
+    #     scoreb.point_for_r()
+    #     ball.reset_position()
+
+
+screen.exitonclick()

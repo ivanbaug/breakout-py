@@ -1,17 +1,22 @@
 from turtle import Turtle
 
+BALL_DIA = 0.8
+
 
 class Ball(Turtle):
     def __init__(self):
         super().__init__()
         self.shape("circle")
-        self.shapesize(stretch_len=0.8, stretch_wid=0.8, outline=2)
+        self.shapesize(stretch_len=BALL_DIA, stretch_wid=BALL_DIA)
         self.penup()
         self.color("orange")
         self.speed("fastest")
         self.x_move = 10
         self.y_move = 10
         self.move_speed = 0.05
+        # for collision just a box
+        self.w = BALL_DIA * 20  # px
+        self.h = BALL_DIA * 20  # px
 
     def move(self):
         new_x = self.xcor() + self.x_move

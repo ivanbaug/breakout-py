@@ -47,6 +47,41 @@ screen.onkeypress(key="Right", fun=pd.move_right)
 
 game_is_on = True
 
+# Collision just for rectangles, assuming ball is a little box
+# def det_collision(obj1, obj2):
+
+#     # if (
+#     #     obj1.xcor() < obj2.xcor() + obj2.w
+#     #     and obj1.xcor() + obj1.w > obj2.xcor()
+#     #     and obj1.ycor() < obj2.ycor() + obj2.h
+#     #     and obj1.ycor() + obj1.h > obj2.ycor()
+#     # ):
+#     if (
+#         abs(obj1.xcor() - obj2.xcor()) <= (obj1.w + obj2.w) / 2
+#         and abs(obj1.ycor() - obj2.ycor()) <= (obj1.h + obj2.h) / 2
+#     ):
+#         return True
+#     return False
+def det_collision(obj1, obj2):
+
+    x_max_dist = (obj1.w + obj2.w) / 2
+    x_dist = abs(obj1.xcor() - obj2.xcor())
+    y_max_dist = (obj1.h + obj2.h) / 2
+    y_dist = abs(obj1.ycor() - obj2.ycor())
+
+    ratio_x = x_dist / x_max_dist
+    ratio_y = y_dist / y_max_dist
+
+    if x_dist <= x_max_dist and y_dist <= y_max_dist:
+        if ratio_x > ratio_y:
+            # Bounce on x axis
+            return True, True
+        else:
+            # Bounce on y axis
+            return True, False
+    return False, False
+
+
 while game_is_on:
     ball.move()
     screen.update()
@@ -59,6 +94,23 @@ while game_is_on:
 
     if ball.xcor() > (S_WIDTH / 2 - 16 - 10) or ball.xcor() < -(S_WIDTH / 2 - 16):
         ball.bounce_x()
+
+    for i, brick in enumerate(bm.all_bricks):
+        collides, c_x = det_collision(brick, ball)
+        if collides:
+            if c_x:
+                ball.bounce_x()
+            else:
+                ball.bounce_y()
+            bm.remove_brick(i)
+
+    #  Paddle Collision detection
+    collides, c_x = det_collision(pd, ball)
+    if collides:
+        if c_x:
+            ball.bounce_x()
+        else:
+            ball.bounce_y()
     # detect collision with r paddle
 
     # if (ball.distance(rp) < 50 and ball.xcor() > 320) or (
