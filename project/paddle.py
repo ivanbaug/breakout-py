@@ -37,13 +37,13 @@ class Paddle(Turtle):
     def move_left(self):
 
         x, y = self.pos()
-        print(f"left...x:{x}, y:{y}")
+        # print(f"left...x:{x}, y:{y}")
         if x > self.x_limit_L:
             self.goto(x - DISPLACEMENT, y)
 
     def move_right(self):
 
         x, y = self.pos()
-        print(f"right...x:{x}, y:{y}")
+        # print(f"right...x:{x}, y:{y}")
         if x < self.x_limit_R:
             self.goto(x + DISPLACEMENT, y)

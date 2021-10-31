@@ -10,9 +10,7 @@ S_WIDTH = 800
 S_HEIGHT = 600
 
 
-# Default turtle size is 20 px by 20 px
-
-
+# Setting the screen up
 screen = Screen()
 screen.setup(width=S_WIDTH, height=S_HEIGHT)
 screen.bgcolor("black")
@@ -35,33 +33,14 @@ scoreb = Scoreboard()
 bm = BrickManager((S_WIDTH, S_HEIGHT))
 bm.create_bricks()
 
-# screen.onkeypress(key="Up", fun=rp.move_up)
-# screen.onkeypress(key="Down", fun=rp.move_down)
 
 screen.onkeypress(key="Left", fun=pd.move_left)
 screen.onkeypress(key="Right", fun=pd.move_right)
-
-# screen.onkeypress(key="w", fun=lp.move_up)
-# screen.onkeypress(key="s", fun=lp.move_down)
-
+screen.onkeypress(key="space", fun=scoreb.begin_level)
 
 game_is_on = True
 
-# Collision just for rectangles, assuming ball is a little box
-# def det_collision(obj1, obj2):
 
-#     # if (
-#     #     obj1.xcor() < obj2.xcor() + obj2.w
-#     #     and obj1.xcor() + obj1.w > obj2.xcor()
-#     #     and obj1.ycor() < obj2.ycor() + obj2.h
-#     #     and obj1.ycor() + obj1.h > obj2.ycor()
-#     # ):
-#     if (
-#         abs(obj1.xcor() - obj2.xcor()) <= (obj1.w + obj2.w) / 2
-#         and abs(obj1.ycor() - obj2.ycor()) <= (obj1.h + obj2.h) / 2
-#     ):
-#         return True
-#     return False
 def det_collision(obj1, obj2):
 
     x_max_dist = (obj1.w + obj2.w) / 2
@@ -83,48 +62,66 @@ def det_collision(obj1, obj2):
 
 
 while game_is_on:
-    ball.move()
+
     screen.update()
-    time.sleep(ball.move_speed)
 
-    # detect collision with wall
+    if not scoreb.start_level:
+        x, y = pd.pos()
+        ball.follow_paddle((x, y + pd.h))
+        ball.set_speed(scoreb.level_speed())
 
-    if ball.ycor() > 280 or ball.ycor() < -280:
-        ball.bounce_y()
+    while scoreb.start_level:
 
-    if ball.xcor() > (S_WIDTH / 2 - 16 - 10) or ball.xcor() < -(S_WIDTH / 2 - 16):
-        ball.bounce_x()
+        ball.move()
+        screen.update()
+        time.sleep(ball.move_speed)
 
-    for i, brick in enumerate(bm.all_bricks):
-        collides, c_x = det_collision(brick, ball)
+        if not bm.all_bricks:
+            if scoreb.level == 5:
+
+                scoreb.game_win()
+                game_is_on = False
+                break
+
+            scoreb.level_completed()
+            x, y = pd.pos()
+            ball.follow_paddle((x, y + pd.h))
+            bm.create_bricks()
+
+        # detect collision with wall
+
+        if ball.ycor() > S_HEIGHT / 2 - 20:
+            ball.bounce_y()
+
+        if ball.xcor() > (S_WIDTH / 2 - 16 - 10) or ball.xcor() < -(S_WIDTH / 2 - 16):
+            ball.bounce_x()
+
+        # collision with bricks
+        for i, brick in enumerate(bm.all_bricks):
+            collides, c_x = det_collision(brick, ball)
+            if collides:
+                if c_x:
+                    ball.bounce_x()
+                else:
+                    ball.bounce_y()
+                bm.remove_brick(i)
+                scoreb.point_for_plyer()
+
+        #  Paddle Collision detection
+        collides, c_x = det_collision(pd, ball)
         if collides:
             if c_x:
                 ball.bounce_x()
             else:
                 ball.bounce_y()
-            bm.remove_brick(i)
 
-    #  Paddle Collision detection
-    collides, c_x = det_collision(pd, ball)
-    if collides:
-        if c_x:
-            ball.bounce_x()
-        else:
-            ball.bounce_y()
-    # detect collision with r paddle
-
-    # if (ball.distance(rp) < 50 and ball.xcor() > 320) or (
-    #     ball.distance(lp) < 50 and ball.xcor() < -320
-    # ):
-    #     ball.bounce_x()
-
-    # right paddle misses
-    # if ball.xcor() > 380:
-    #     scoreb.point_for_l()
-    #     ball.reset_position()
-    # if ball.xcor() < -380:
-    #     scoreb.point_for_r()
-    #     ball.reset_position()
+        # detect lost ball
+        if ball.ycor() < -S_HEIGHT / 2:
+            scoreb.lost_life()
+            if scoreb.lives == 0:
+                scoreb.game_over()
+                game_is_on = False
+                break
 
 
 screen.exitonclick()

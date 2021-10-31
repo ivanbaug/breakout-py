@@ -1,6 +1,7 @@
 from turtle import Turtle
 
 COLORS = ["red", "orange", "yellow", "green", "blue", "blue"]
+# COLORS = ["blue"]
 BRICK_WIDTH = 3
 BRICK_HEIGHT = 1
 BRICK_WIDTH_PX = BRICK_WIDTH * 20
@@ -36,10 +37,10 @@ class BrickManager:
             - self.max_bricks_x * (BRICK_WIDTH_PX + SPACING)
         )
         x_start = -self.window_width / 2 + (BRICK_WIDTH_PX / 2) + (space_left_x / 2)
-        # x_start = -120
+        # x_start = 30
         spacing_top = self.window_height / 2 - BRICK_HEIGHT_PX * 8
         for i, clr in enumerate(COLORS):
-            # for j in range(5):
+            # for j in range(1):
             for j in range(self.max_bricks_x):
                 new_brick = Brick()
                 new_brick.color(clr)

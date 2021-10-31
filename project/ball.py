@@ -32,6 +32,12 @@ class Ball(Turtle):
         # self.move_speed *= 0.5
 
     def reset_position(self):
-        self.move_speed = 0.1
+        # self.move_speed = 0.1
         self.goto(0, 0)
-        self.bounce_x()
+        # self.bounce_x()
+
+    def follow_paddle(self, coord):
+        self.goto(coord)
+
+    def set_speed(self, speed):
+        self.move_speed = speed
